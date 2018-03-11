@@ -4,8 +4,12 @@
 use strict;
 use Term::ANSIColor qw(colored);
 
+# Set your desired GPU temperature in Celsius below:
 my $targettemp=68;
+# Set the duration between captures in Seconds below:
+my $timetosleep=30;
 
+############ Nothing to change below here
 my %gpu;
 my @listgpus = `lspci | grep VGA`;
 my $gpucount = scalar @listgpus -1;
@@ -26,6 +30,7 @@ for my $fans ( @fanspeeds ) {
 		$gpu{$gpu}{fanpercentage} = $2;
 	}
 }
+
 for my $temps ( @gputemps ) {
 	if ( $temps =~ m/(\d+)\]\)\: (\d+)/ ) {
 		my $gpu = "gpu:".$1;
@@ -51,10 +56,8 @@ for (my $i=0; $i<=$gpucount; $i++){
 		my $setfanpercentage = $gpu{$gpu}{fanpercentage}+$changevalue;
 		if ( $setfanpercentage > 99 ) { $setfanpercentage=100; }
 		`nvidia-settings -a [$fan]/GPUTargetFanSpeed=$setfanpercentage`;
-		# Fan info
-		$out .= &outputfan('%s+%s:', $gpu{$gpu}{fanpercentage}, $changevalue );
-		# Temp info
-		$out .= &outputtemp('%s] ', $gpu{$gpu}{temperature} );
+		$out .= &output('%s+%s:', $gpu{$gpu}{fanpercentage}, '%', $changevalue );
+		$out .= &output('%s] ', $gpu{$gpu}{temperature}, 'C' );
 	} elsif ( $tempdiff < -1 ) { # Hotter than target temp
 		if ( $tempdiff < -2 ) { $changevalue=2; }
 		if ( $tempdiff < -5 ) { $changevalue=5; }
@@ -64,15 +67,11 @@ for (my $i=0; $i<=$gpucount; $i++){
 		my $setfanpercentage = $gpu{$gpu}{fanpercentage}-$changevalue;
 		if ( $setfanpercentage < 1 ) { $setfanpercentage=0; }
 		`nvidia-settings -a [$fan]/GPUTargetFanSpeed=$setfanpercentage`;
-		# Fan info
-		$out .= &outputfan('%s-%s:', $gpu{$gpu}{fanpercentage}, $changevalue );
-		# Temp info
-		$out .= &outputtemp('%s] ', $gpu{$gpu}{temperature} );
+		$out .= &output('%s-%s:', $gpu{$gpu}{fanpercentage}, '%', $changevalue );
+		$out .= &output('%s] ', $gpu{$gpu}{temperature}, 'C' );
 	} else { # No Fan changes needed
-		# Fan info
-		$out .= &outputfan('%s:', $gpu{$gpu}{fanpercentage}, 0 );
-		# Temp info
-		$out .= &outputtemp('%s] ', $gpu{$gpu}{temperature} );
+		$out .= &output('%s:', $gpu{$gpu}{fanpercentage}, '%' );
+		$out .= &output('%s] ', $gpu{$gpu}{temperature}, 'C' );
 	}
 
 	if ( $columnscounter <= $gpusperrow ) {
@@ -83,35 +82,21 @@ for (my $i=0; $i<=$gpucount; $i++){
 	       $columnscounter=1;
 	}
 }
+
 print "\n";
-sleep(30);
+sleep($timetosleep);
 goto start;
 
-sub outputfan {
-	my ($format, $currentvalue, $changevalue) = @_;
+sub output {
+	my ($format, $currentvalue, $unit, $changevalue) = @_;
 
 	my $out;
 	if ( $currentvalue > 79 ) {
-		$out .= sprintf( $format, colored($currentvalue.'%', 'red'), $changevalue );
+		$out .= sprintf( $format, colored($currentvalue.$unit, 'red'), $changevalue );
 	} elsif ( $currentvalue > 69 ) {
-		$out .= sprintf( $format, colored($currentvalue.'%', 'yellow'), $changevalue );
+		$out .= sprintf( $format, colored($currentvalue.$unit, 'yellow'), $changevalue );
 	} else { 
-		$out .= sprintf( $format, colored($currentvalue.'%', 'green'), $changevalue );
-	}
-
-	return $out;
-}
-
-sub outputtemp {
-	my ($format, $currentvalue) = @_;
-
-	my $out;
-	if ( $currentvalue > 79 ) {
-		$out .= sprintf( $format, colored($currentvalue.'C', 'red') );
-	} elsif ( $currentvalue > 69 ) {
-		$out .= sprintf( $format, colored($currentvalue.'C', 'yellow') );
-	} else { 
-		$out .= sprintf( $format, colored($currentvalue.'C', 'green') );
+		$out .= sprintf( $format, colored($currentvalue.$unit, 'green'), $changevalue );
 	}
 
 	return $out;
