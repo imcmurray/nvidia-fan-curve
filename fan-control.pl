@@ -16,16 +16,21 @@ my @listgpus = `lspci | grep VGA`;
 my $gpucount = scalar @listgpus -1;
 my $columns = `tput cols`;
 my $gpusperrow = int($columns/16);
+my $statfile = '/tmp/fan-control.stat';
+
+END {
+	`rm $statfile`;
+}
 
 # Startup conditions - set all fans to 80%
-if ( ! -e '/tmp/fan-control.stat' ) {
+if ( ! -e $statfile ) {
 	for (my $i=0; $i<=$gpucount; $i++){
 		my $gpu = "gpu:".$i;
 		my $fan = "fan:".$i;
 		if ( system("nvidia-settings -a [$gpu]/GPUFanControlState=1") == 0 ) {
-			if ( system("nvidia-settings -a [$fan]/GPUTargetFanSpeed=80") == 0 ) {
-				if ( $i == $gpucount ) {
-					`touch /tmp/fan-control.stat`;
+			if ( system("nvidia-settings -a [$fan]/GPUTargetFanSpeed=70") == 0 ) {
+				if ( $i == $gpucount ) { 
+					`touch $statfile`;
 					goto start;
 				}
 			} else {
