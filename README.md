@@ -17,7 +17,7 @@ my $targettemp=68;
 my $timetosleep=15;
 ```
 
-I also assume that you have already already installed the Nvidia drivers and have set them up accordingly. If you're simply ramping up your fans to 100% then this could save you a few watts of power buy adjusting and maintaining a desired temperature. Lower wattage means more profit.
+I also assume that you have already installed the Nvidia drivers and have set them up accordingly. If you're simply ramping up your fans to 100% then this could save you a few watts of power buy adjusting and maintaining a desired temperature. Lower wattage means more profit.
 
 Your feedback is greatly appreciate.
 
