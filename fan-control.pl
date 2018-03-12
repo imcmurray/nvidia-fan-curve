@@ -7,14 +7,35 @@ use Term::ANSIColor qw(colored);
 # Set your desired GPU temperature in Celsius below:
 my $targettemp=68;
 # Set the duration between captures in Seconds below:
-my $timetosleep=30;
+my $timetosleep=15;
 
 ############ Nothing to change below here
+ 
 my %gpu;
 my @listgpus = `lspci | grep VGA`;
 my $gpucount = scalar @listgpus -1;
 my $columns = `tput cols`;
 my $gpusperrow = int($columns/16);
+
+# Startup conditions - set all fans to 80%
+if ( ! -e '/tmp/fan-control.stat' ) {
+	for (my $i=0; $i<=$gpucount; $i++){
+		my $gpu = "gpu:".$i;
+		my $fan = "fan:".$i;
+		if ( system("nvidia-settings -a [$gpu]/GPUFanControlState=1") == 0 ) {
+			if ( system("nvidia-settings -a [$fan]/GPUTargetFanSpeed=80") == 0 ) {
+				if ( $i == $gpucount ) {
+					`touch /tmp/fan-control.stat`;
+					goto start;
+				}
+			} else {
+				die("Unable to set Fan Speed for GPU!");
+			}
+		} else {
+			die("Unable to set State for GPU!");
+		}
+	}
+}
 
 start:
 
