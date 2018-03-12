@@ -18,9 +18,8 @@ my $columns = `tput cols`;
 my $gpusperrow = int($columns/16);
 my $statfile = '/tmp/fan-control.stat';
 
-END {
-	`rm $statfile`;
-}
+$SIG{INT}  = sub { unlink($statfile); die(); };
+$SIG{TERM} = sub { unlink($statfile); die(); };
 
 # Startup conditions - set all fans to 80%
 if ( ! -e $statfile ) {
