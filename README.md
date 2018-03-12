@@ -14,5 +14,11 @@ Your feedback is greatly appreciate.
 
 Find this useful? Then why not send me some Zcash if you did:
 
+t1YQLYazSJMDTdJXkoJqaiashkhQspRi15u
+(visible to the Zcash blockchain)
+
+or if you want to be totally anonymous, use my z_address:
+
 zcWF35W9fvNczXC9cWoJQ1M7pCJRamvWV6VFzDrM55b3zrqrjSFPv7zv1ybXzDEBPWF5hepst9t4m3f4uSFVzfb4BsmdGUN
+(Hidden in the blockchain - awesome Zcash)
 
